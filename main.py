@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 # ============================================================
 
 # IEVADI ŠEIT JAUNO DISCORD WEBHOOK URL
-DISCORD_WEBHOOK_URL = "IEVIETO_SAVU_JAUNO_DISCORD_WEBHOOK"
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
 
 # TikTok lietotāji, kurus uzraudzīt
 TIKTOK_USERS = [
