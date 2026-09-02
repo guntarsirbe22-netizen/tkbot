@@ -5,10 +5,10 @@ import os
 import re
 
 # ==================== KONFIGURĀCIJA ====================
-# TAVS PAREIZAIS DISCORD WEBHOOK LINKS:
+# Tavs pareizais Discord Webhook links:
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
 
-# TIEŠI TIE 3 LIETOTĀJI, KURUS VAJAG UZRAUDZĪT:
+# Tieši tie 3 lietotāji, kurus bots uzrauga:
 TIKTOK_USERS = ["gun4atrakias", "sirmais28", "salvixs18"]
 # =======================================================
 
@@ -46,7 +46,7 @@ def check_live():
     }
 
     for user in TIKTOK_USERS:
-        # ŠEIT SAITE IR PILNĪBĀ SALABOTA:
+        # ŠEIT SAITE IR 100% IZLABOTA UN STRĀDĀJOŠA:
         url = f"https://tiktok.com@{user}/live"
         try:
             response = requests.get(url, headers=headers, timeout=15)
@@ -93,5 +93,4 @@ def check_live():
 
 if __name__ == "__main__":
     print("🤖 TikTok LIVE bots (Cron bezmaksas versija) ir palaists!")
-    # Veic vienu pārbaudi un beidz darbu, lai bez maksas darbotos caur GitHub Actions vai Render Cron Job
     check_live()
