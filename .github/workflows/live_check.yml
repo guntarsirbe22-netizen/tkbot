@@ -1,0 +1,28 @@
+name: TikTok Live Check
+
+on:
+  schedule:
+    # Liek GitHub bez maksas ieslēgties reizi 5 minūtēs
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Ļauj tev pašam jebkurā brīdī palaist pārbaudi ar pogu
+
+jobs:
+  check-live:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository code
+      uses: actions/actions/checkout@v3
+
+    - name: Set up Python environment
+      uses: actions/actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install required libraries
+      run: |
+        pip install requests
+
+    - name: Run TikTok Bot
+      run: |
+        python toktok_bots.py
