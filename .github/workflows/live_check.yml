@@ -25,4 +25,5 @@ jobs:
 
     - name: Run TikTok Bot
       run: |
-        python toktok_bots.py
+        python main.py
+
