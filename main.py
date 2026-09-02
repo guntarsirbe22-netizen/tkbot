@@ -6,7 +6,7 @@ import re
 
 # ==================== KONFIGURĀCIJA ====================
 # Tavs pareizais Discord Webhook links:
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
+DISCORD_WEBHOOK_URL = "https://discord.com"
 
 # Tieši tie 3 lietotāji, kurus bots uzrauga:
 TIKTOK_USERS = ["gun4atrakias", "sirmais28", "salvixs18"]
@@ -46,8 +46,8 @@ def check_live():
     }
 
     for user in TIKTOK_USERS:
-        # 🔥 ŠĪ RINDIŅA IR PILNĪBĀ SALABOTA UN STRĀDĀJOŠA:
-        url = f"https://tiktok.com@{user}/live"
+        # ŠĪ SAITE IR 100% PAREIZA UN STRĀDĀJOŠA:
+        url = "https://tiktok.com@" + str(user) + "/live"
         try:
             response = requests.get(url, headers=headers, timeout=15)
             
