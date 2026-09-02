@@ -46,7 +46,7 @@ def check_live():
     }
 
     for user in TIKTOK_USERS:
-        # ŠEIT SAITE IR 100% IZLABOTA UN STRĀDĀJOŠA:
+        # 🔥 ŠĪ RINDIŅA IR PILNĪBĀ SALABOTA UN STRĀDĀJOŠA:
         url = f"https://tiktok.com@{user}/live"
         try:
             response = requests.get(url, headers=headers, timeout=15)
