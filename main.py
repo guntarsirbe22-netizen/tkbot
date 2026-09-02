@@ -6,7 +6,7 @@ import re
 
 # ==================== KONFIGURĀCIJA ====================
 # Tavs pareizais Discord Webhook links:
-DISCORD_WEBHOOK_URL = "https://discord.com"
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
 
 # Tieši tie 3 lietotāji, kurus bots uzrauga:
 TIKTOK_USERS = ["gun4atrakias", "sirmais28", "salvixs18"]
