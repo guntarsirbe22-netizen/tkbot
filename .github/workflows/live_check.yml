@@ -2,8 +2,9 @@ name: TikTok Live Check
 
 on:
   schedule:
+    # Liek GitHub bez maksas ieslēgties reizi 5 minūtēs mākonī
     - cron: '*/5 * * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Ļauj tev pašam jebkurā brīdī palaist pārbaudi ar pogu
 
 jobs:
   check-live:
