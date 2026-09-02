@@ -5,12 +5,11 @@ import os
 import re
 
 # ==================== KONFIGURĀCIJA ====================
-DISCORD_WEBHOOK_URL = "https://discord.com"
+# TAVS PAREIZAIS DISCORD WEBHOOK LINKS:
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
 
+# TIEŠI TIE 3 LIETOTĀJI, KURUS VAJAG UZRAUDZĪT:
 TIKTOK_USERS = ["gun4atrakias", "sirmais28", "salvixs18"]
-
-# Render serverim 5 minūtes ir ideāls laiks
-CHECK_INTERVAL = 300
 # =======================================================
 
 STATUS_FILE = "live_status.json"
@@ -47,7 +46,7 @@ def check_live():
     }
 
     for user in TIKTOK_USERS:
-        # SAITE PILNĪBĀ IZLABOTA UN PĀRBAUDĪTA
+        # ŠEIT SAITE IR PILNĪBĀ SALABOTA:
         url = f"https://tiktok.com@{user}/live"
         try:
             response = requests.get(url, headers=headers, timeout=15)
@@ -65,7 +64,7 @@ def check_live():
                     "embeds": [
                         {
                             "title": "🔴 TIEŠRAIDE IR SĀKUSIES!",
-                            "description": f"**{user}** nupat uzsāka LIVE strīmu vietnē TikTok!\n\n👉 [KLIKŠĶINI ŠEIT, LAI SKATĪTOS](https://tiktok.com@{user}/live)",
+                            "description": f"**{user}** nupat uzsāka LIVE strīmu vietnē TikTok!\n\n👉 [KLIKŠĶINI ŠEIT, LAI SKATĪTOS]({url})",
                             "color": 16711711,
                             "thumbnail": {
                                 "url": user_avatar
@@ -93,7 +92,6 @@ def check_live():
     save_status(current_status)
 
 if __name__ == "__main__":
-    print("🤖 TikTok LIVE bots uz Render servera ir palaists!")
-    while True:
-        check_live()
-        time.sleep(CHECK_INTERVAL)
+    print("🤖 TikTok LIVE bots (Cron bezmaksas versija) ir palaists!")
+    # Veic vienu pārbaudi un beidz darbu, lai bez maksas darbotos caur GitHub Actions vai Render Cron Job
+    check_live()
