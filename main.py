@@ -3,6 +3,7 @@ import time
 import json
 import os
 import re
+import asyncio
 from datetime import datetime, timezone
 
 # ============================================================
@@ -31,7 +32,7 @@ REQUEST_TIMEOUT = 15
 # ============================================================
 
 def load_status():
-    """Ielādē ieprevienoto LIVE statusu no faila."""
+    """Ielādē iepriekšējo LIVE statusu no faila."""
     if not os.path.exists(STATUS_FILE):
         return {}
 
@@ -59,21 +60,25 @@ def save_status(status):
 #                 TIKTOK DATU IEGŪŠANA
 # ============================================================
 
-def check_tiktok_live(user):
-    """Pārbauda TikTok lietotāju, izmantojot stabilo API struktūru."""
+async def fetch_live_status_async(user):
+    """Asinhronā funkcija, kas pareizi izpilda un sagaida TikTok API datus."""
     from TikTokLive.client.client import TikTokLiveClient
-
-    try:
-        # Izveidojam klientu un pieprasām istabas datus pa tiešo no TikTok
-        client = TikTokLiveClient(unique_id=user)
-        room_info = client.web.fetch_room_info()
+    
+    client = TikTokLiveClient(unique_id=user)
+    # Izmantojam 'await', lai pareizi sagaidītu asinhrono pieprasījumu
+    room_info = await client.web.fetch_room_info()
+    
+    if not room_info or 'status' not in room_info:
+        return False
         
-        if not room_info or 'status' not in room_info:
-            return False
-            
-        # Statusa kods 2 nozīmē, ka strīms ir aktīvs
-        return room_info.get('status') == 2
+    return room_info.get('status') == 2
 
+
+def check_tiktok_live(user):
+    """Pārbauda TikTok lietotāju, palaižot asinhrono kodu parastā režīmā."""
+    try:
+        # Pareizi palaižam asinhrono funkciju un sagaidām rezultātu
+        return asyncio.run(fetch_live_status_async(user))
     except Exception as e:
         print(f"⚠️ TikTok API kļūda, pārbaudot @{user}: {e}")
         return None
