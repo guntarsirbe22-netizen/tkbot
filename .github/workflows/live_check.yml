@@ -22,7 +22,7 @@ jobs:
       - name: Install required libraries
         run: |
           python -m pip install --upgrade pip
-          pip install requests
+          pip install requests TikTokLive
 
       - name: Run TikTok Bot
         env:
