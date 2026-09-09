@@ -3,7 +3,6 @@ import time
 import json
 import os
 import re
-import asyncio
 from datetime import datetime, timezone
 
 # ============================================================
@@ -60,27 +59,41 @@ def save_status(status):
 #                 TIKTOK DATU IEGŪŠANA
 # ============================================================
 
-async def fetch_live_status_async(user):
-    """Asinhronā funkcija, kas pareizi izpilda un sagaida TikTok API datus."""
-    from TikTokLive.client.client import TikTokLiveClient
-    
-    client = TikTokLiveClient(unique_id=user)
-    # Izmantojam 'await', lai pareizi sagaidītu asinhrono pieprasījumu
-    room_info = await client.web.fetch_room_info()
-    
-    if not room_info or 'status' not in room_info:
-        return False
-        
-    return room_info.get('status') == 2
-
-
 def check_tiktok_live(user):
-    """Pārbauda TikTok lietotāju, palaižot asinhrono kodu parastā režīmā."""
+    """Pārbauda TikTok lietotāju, izmantojot drošu un nebloķējamu plūsmas metodi."""
+    url = f"https://tiktok.com@{user}/live"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+    }
+
     try:
-        # Pareizi palaižam asinhrono funkciju un sagaidām rezultātu
-        return asyncio.run(fetch_live_status_async(user))
+        # Veicam pieprasījumu, neļaujot automātiski pāradresēt.
+        # Ja lietotājs NAV live, TikTok pāradresē uz parasto profilu.
+        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, allow_redirects=False)
+        
+        # Ja statuss ir 301 vai 302 (pāradresācija), strīms nav aktīvs
+        if response.status_code in:
+            return False
+            
+        # Ja statuss ir 200, mēs esam iekšā LIVE istabā
+        if response.status_code == 200:
+            html = response.text
+            # Papildu drošībai pārbaudām, vai lapā nav slēgšanas pazīmju
+            if "room_id" in html or "ROOM_STATUS_LIVING" in html or '"status":2' in html or "live-player" in html:
+                return True
+            # Ja lapa atvērās, bet pazīmju nav, pārbaudām, vai neesam parastajā profilā
+            if '"isLive":true' in html:
+                return True
+
+        return False
+
     except Exception as e:
-        print(f"⚠️ TikTok API kļūda, pārbaudot @{user}: {e}")
+        print(f"⚠️ Kļūda, pārbaudot @{user}: {e}")
         return None
 
 
@@ -110,7 +123,7 @@ def get_user_avatar(user):
     """Iegūst TikTok lietotāja profila bildes adresi."""
     url = f"https://tiktok.com@{user}"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9"
     }
     try:
