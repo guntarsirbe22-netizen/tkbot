@@ -1,28 +1,34 @@
-name: TikTok Live Check
+name: Streamer Alerts Poller
 
 on:
   schedule:
-    # Liek GitHub bez maksas ieslēgties reizi 5 minūtēs mākonī
-    - cron: '*/5 * * * *'
-  workflow_dispatch: # Ļauj tev pašam jebkurā brīdī palaist pārbaudi ar pogu
+    # Šis automātiski iedarbinās botu ik pēc 10 minūtēm
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Saglabā pogu manuālai palaišanai
 
 jobs:
-  check-live:
+  run-bot:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository code
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python environment
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-    - name: Install required libraries
-      run: |
-        pip install requests
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run TikTok Bot
-      run: |
-        python main.py
+      - name: Deploy commands
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: npm run deploy
+
+      - name: Run Alert Check
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          CRON_MODE: "true" 
+        run: npm start
