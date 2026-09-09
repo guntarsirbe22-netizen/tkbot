@@ -21,7 +21,7 @@ TIKTOK_USERS = [
     "salvixs18"
 ]
 
-# Statusa fails, kurā bots atceras, vai strīmeris jau bija LIVE
+# Statusa fails, kurā bots atceras, vai strīmeris już bija LIVE
 STATUS_FILE = "live_status.json"
 
 # HTTP timeout sekundēs
@@ -127,7 +127,7 @@ def check_tiktok_live(user):
 # ============================================================
 
 def send_discord_notification(user, avatar_url=None):
-    """Nosūta smuku LIVE paziņojumu uz Discord."""
+    """Nosūta skaistu un modernu LIVE paziņojumu uz Discord."""
     if not DISCORD_WEBHOOK_URL:
         print("❌ Kļūda: DISCORD_WEBHOOK_URL nav atrasts GitHub Secrets iestatījumos!")
         return False
@@ -135,31 +135,41 @@ def send_discord_notification(user, avatar_url=None):
     tiktok_url = f"https://tiktok.com@{user}/live"
     timestamp = datetime.now(timezone.utc).isoformat()
 
+    # Izveidojam glītu un pārskatāmu aprakstu ar emocijzīmēm
+    description_text = (
+        f"📣 **{user}** pašlaik ir tiešraidē vietnē TikTok!\n\n"
+        f"🚜 **Nāc un pievienojies saimniecībai:**\n"
+        f"👉 [KLIKŠĶINI ŠEIT, LAI SKATĪTOS TIEŠRAIDI]({tiktok_url})\n\n"
+        f"🌾 *Skaties strīmu, čato un atbalsti mūsējos!*"
+    )
+
     embed = {
         "title": "🔴 TIEŠRAIDE IR SĀKUSIES!",
-        "description": (
-            f"**{user}** nupat uzsāka LIVE strīmu vietnē TikTok!\n\n"
-            f"👉 [KLIKŠĶINI ŠEIT, LAI SKATĪTOS]({tiktok_url})"
-        ),
-        "color": 16711711,
+        "url": tiktok_url,
+        "description": description_text,
+        # TikTok raksturīgā sarkanīgi rozā krāsa (Hex: #FE2C55 jeb Decimal: 16657493)
+        "color": 16657493,
         "timestamp": timestamp,
         "footer": {
-            "text": "TikTok LIVE paziņojums"
+            "text": "TikTok Live Alerts • Farming Vidzeme",
+            "icon_url": "https://redditmedia.com" # Mazā TikTok ikona apakšā
         }
     }
 
+    # Ja botam izdosies atrast strīmera profila bildi, tā tiks parādīta kā liels attēls labajā pusē
     if avatar_url:
         embed["thumbnail"] = {"url": avatar_url}
 
     payload = {
-        "username": f"{user} LIVE",
+        "username": "Farming Vidzeme Alerts",
+        "avatar_url": "https://redditmedia.com", # Bota profila bilde Discordā
         "embeds": [embed]
     }
 
     try:
         response = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=REQUEST_TIMEOUT)
         if 200 <= response.status_code < 300:
-            print(f"✅ Discord paziņojums nosūtīts par @{user}")
+            print(f"✅ Skaistais Discord paziņojums nosūtīts par @{user}")
             return True
         print(f"❌ Discord webhook kļūda: HTTP {response.status_code}")
         return False
@@ -179,7 +189,7 @@ def check_all_users():
     print("\n" + "="*60)
     print("🔄 Pārbaudu TikTok tiešraižu statusus...")
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    print("="*60)
+    print("=" * 60)
 
     for user in TIKTOK_USERS:
         print(f"\n👤 Pārbaudu @{user}...")
