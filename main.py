@@ -9,19 +9,17 @@ from datetime import datetime, timezone
 #                 KONFIGURĀCIJA
 # ============================================================
 
-# DROŠĪBA: Kods automātiski paņem saiti no GitHub Secrets (tavas iestatītās saites).
-# Faila tekstā nekas nav redzams un uzbrucēji tam vairs netiek klāt!
+# DROŠĪBA: Kods automātiski paņem saiti no GitHub Secrets.
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 # TikTok lietotāji, kurus uzraudzīt. 
-# Ja vēlies kādu pievienot vai dzēst, maini tikai šo sarakstu:
 TIKTOK_USERS = [
     "gun4atrakias",
     "sirmais28",
     "salvixs18"
 ]
 
-# Statusa fails, kurā bots atceras, vai strīmeris już bija LIVE
+# Statusa fails, kurā bots atceras, vai strīmeris jau bija LIVE
 STATUS_FILE = "live_status.json"
 
 # HTTP timeout sekundēs
@@ -33,7 +31,7 @@ REQUEST_TIMEOUT = 15
 # ============================================================
 
 def load_status():
-    """Ielādē iepriekšējo LIVE statusu no faila."""
+    """Ielādē ieprevienoto LIVE statusu no faila."""
     if not os.path.exists(STATUS_FILE):
         return {}
 
@@ -61,6 +59,26 @@ def save_status(status):
 #                 TIKTOK DATU IEGŪŠANA
 # ============================================================
 
+def check_tiktok_live(user):
+    """Pārbauda TikTok lietotāju, izmantojot stabilo API struktūru."""
+    from TikTokLive.client.client import TikTokLiveClient
+
+    try:
+        # Izveidojam klientu un pieprasām istabas datus pa tiešo no TikTok
+        client = TikTokLiveClient(unique_id=user)
+        room_info = client.web.fetch_room_info()
+        
+        if not room_info or 'status' not in room_info:
+            return False
+            
+        # Statusa kods 2 nozīmē, ka strīms ir aktīvs
+        return room_info.get('status') == 2
+
+    except Exception as e:
+        print(f"⚠️ TikTok API kļūda, pārbaudot @{user}: {e}")
+        return None
+
+
 def get_tiktok_avatar(html_text):
     """Mēģina atrast TikTok profila bildi HTML datos."""
     patterns = [
@@ -83,43 +101,20 @@ def get_tiktok_avatar(html_text):
     return None
 
 
-def check_tiktok_live(user):
-    """Pārbauda TikTok lietotāju. Atgriež: True=LIVE, False=nav LIVE, None=kļūda."""
-    url = f"https://tiktok.com@{user}/live"
-
+def get_user_avatar(user):
+    """Iegūst TikTok lietotāja profila bildes adresi."""
+    url = f"https://tiktok.com@{user}"
     headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/139.0.0.0 Safari/537.36"
-        ),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "Referer": "https://google.com"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9"
     }
-
     try:
-        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, allow_redirects=True)
-        print(f"   HTTP: {response.status_code} | {response.url}")
-
-        if response.status_code != 200:
-            print(f"⚠️ TikTok atgrieza HTTP {response.status_code} lietotājam @{user}")
-            return None
-
-        html = response.text
-        live_indicators = [
-            '"roomId":"', '"room_id":"', '"roomId":', '"room_id":',
-            "ROOM_STATUS_LIVING", "LIVE_ROOM", '"status":2', '"status":1'
-        ]
-
-        is_live = any(indicator in html for indicator in live_indicators)
-        return is_live
-
-    except Exception as e:
-        print(f"⚠️ Kļūda, pārbaudot @{user}: {e}")
-        return None
+        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+        if response.status_code == 200:
+            return get_tiktok_avatar(response.text)
+    except Exception:
+        pass
+    return None
 
 
 # ============================================================
@@ -135,7 +130,6 @@ def send_discord_notification(user, avatar_url=None):
     tiktok_url = f"https://tiktok.com@{user}/live"
     timestamp = datetime.now(timezone.utc).isoformat()
 
-    # Izveidojam glītu un pārskatāmu aprakstu ar emocijzīmēm
     description_text = (
         f"📣 **{user}** pašlaik ir tiešraidē vietnē TikTok!\n\n"
         f"🚜 **Nāc un pievienojies saimniecībai:**\n"
@@ -147,22 +141,20 @@ def send_discord_notification(user, avatar_url=None):
         "title": "🔴 TIEŠRAIDE IR SĀKUSIES!",
         "url": tiktok_url,
         "description": description_text,
-        # TikTok raksturīgā sarkanīgi rozā krāsa (Hex: #FE2C55 jeb Decimal: 16657493)
         "color": 16657493,
         "timestamp": timestamp,
         "footer": {
             "text": "TikTok Live Alerts • Farming Vidzeme",
-            "icon_url": "https://redditmedia.com" # Mazā TikTok ikona apakšā
+            "icon_url": "https://redditmedia.com"
         }
     }
 
-    # Ja botam izdosies atrast strīmera profila bildi, tā tiks parādīta kā liels attēls labajā pusē
     if avatar_url:
         embed["thumbnail"] = {"url": avatar_url}
 
     payload = {
         "username": "Farming Vidzeme Alerts",
-        "avatar_url": "https://redditmedia.com", # Bota profila bilde Discordā
+        "avatar_url": "https://redditmedia.com",
         "embeds": [embed]
     }
 
@@ -219,22 +211,6 @@ def check_all_users():
     print("\n💾 Statuss saglabāts.\n" + "="*60)
 
 
-def get_user_avatar(user):
-    """Iegūst TikTok lietotāja profila bildes adresi."""
-    url = f"https://tiktok.com@{user}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9"
-    }
-    try:
-        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
-        if response.status_code == 200:
-            return get_tiktok_avatar(response.text)
-    except Exception:
-        pass
-    return None
-
-
 # ============================================================
 #                 GALVENĀ PALAIŠANAS FUNKCIJA
 # ============================================================
@@ -243,7 +219,6 @@ def main():
     print("\n🤖 TikTok LIVE → Discord bots (Cron režīms)")
     print("=" * 60)
     
-    # Izpildām pārbaudi tieši vienu reizi un uzreiz izslēdzamies
     check_all_users()
     print("\n🚀 Pārbaude pabeigta, skripts izslēdzas līdz nākamajai plānotāja reizei.")
 
