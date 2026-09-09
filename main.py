@@ -77,8 +77,8 @@ def check_tiktok_live(user):
         # Ja lietotājs NAV live, TikTok pāradresē uz parasto profilu.
         response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, allow_redirects=False)
         
-        # Šoreiz skaitļi [301, 302] ir vietā un nekas nav bojāts!
-        if response.status_code in:
+        # PĀRRAKSTĪTS BEZ IEFAZĒŠANAS KĻŪDĀM: Parasta un droša pārbaude statusa kodiem
+        if response.status_code == 301 or response.status_code == 302:
             return False
             
         # Ja statuss ir 200, mēs esam iekšā LIVE istabā
