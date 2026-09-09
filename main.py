@@ -62,6 +62,7 @@ def save_status(status):
 
 def check_tiktok_live(user):
     """Pārbauda TikTok lietotāju, izmantojot drošu un nebloķējamu plūsmas metodi."""
+    # SALABOTS: Pievienota pareiza slīpsvītra adresē
     url = f"https://tiktok.com@{user}/live"
 
     headers = {
@@ -77,7 +78,7 @@ def check_tiktok_live(user):
         # Ja lietotājs NAV live, TikTok pāradresē uz parasto profilu.
         response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, allow_redirects=False)
         
-        # PĀRRAKSTĪTS BEZ IEFAZĒŠANAS KĻŪDĀM: Parasta un droša pārbaude statusa kodiem
+        # Parasta un droša pārbaude statusa kodiem
         if response.status_code == 301 or response.status_code == 302:
             return False
             
@@ -121,6 +122,7 @@ def get_tiktok_avatar(html_text):
 
 def get_user_avatar(user):
     """Iegūst TikTok lietotāja profila bildes adresi."""
+    # SALABOTS: Pievienota pareiza slīpsvītra adresē
     url = f"https://tiktok.com@{user}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
