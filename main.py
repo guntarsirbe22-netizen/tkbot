@@ -9,8 +9,9 @@ from datetime import datetime, timezone
 #                 KONFIGURĀCIJA
 # ============================================================
 
-# IEVADI ŠEIT JAUNO DISCORD WEBHOOK URL
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1544706655386738719/hQiHukYZH_TvZ_8Kj1BUOEzmb6Ysm0XTT7G5WPCi0JHpTGH4hL7OkXv_qLMZIwLIjey9"
+# DROŠĪBA: Kods tagad automātiski paņem saiti no GitHub Secrets.
+# Failā nekas vairs nav redzams un nevar noplūst!
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 # TikTok lietotāji, kurus uzraudzīt
 TIKTOK_USERS = [
@@ -215,13 +216,9 @@ def check_tiktok_live(user):
 def send_discord_notification(user, avatar_url=None):
     """Nosūta LIVE paziņojumu Discord."""
 
-    if (
-        not DISCORD_WEBHOOK_URL
-        or DISCORD_WEBHOOK_URL
-        == "IEVIETO_SAVU_JAUNO_DISCORD_WEBHOOK"
-    ):
+    if not DISCORD_WEBHOOK_URL:
         print(
-            "❌ Discord webhook nav iestatīts!"
+            "❌ Kļūda: DISCORD_WEBHOOK_URL nav atrasts GitHub Secrets iestatījumos!"
         )
         return False
 
