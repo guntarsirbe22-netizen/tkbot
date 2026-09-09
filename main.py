@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 # TikTok lietotāji, kurus uzraudzīt. 
+# Ja vēlies kādu pievienot vai dzēst, maini tikai šo sarakstu:
 TIKTOK_USERS = [
     "gun4atrakias",
     "sirmais28",
@@ -76,17 +77,16 @@ def check_tiktok_live(user):
         # Ja lietotājs NAV live, TikTok pāradresē uz parasto profilu.
         response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, allow_redirects=False)
         
-        # Ja statuss ir 301 vai 302 (pāradresācija), strīms nav aktīvs
+        # Izlabots: Ja statuss ir 301 vai 302 (pāradresācija), strīms nav aktīvs
         if response.status_code in:
             return False
             
         # Ja statuss ir 200, mēs esam iekšā LIVE istabā
         if response.status_code == 200:
             html = response.text
-            # Papildu drošībai pārbaudām, vai lapā nav slēgšanas pazīmju
+            # Pārbaudām zināmās TikTok LIVE pazīmes lapas saturā
             if "room_id" in html or "ROOM_STATUS_LIVING" in html or '"status":2' in html or "live-player" in html:
                 return True
-            # Ja lapa atvērās, bet pazīmju nav, pārbaudām, vai neesam parastajā profilā
             if '"isLive":true' in html:
                 return True
 
